@@ -15,13 +15,8 @@ router.get('/', (req, res) => {
   // RETURN AN ARRAY WITH ALL THE USERS
 });
 
-router.get('/:id', (req, res) => {
-  const { id } = req.params
-  Users.getById(id)
-    .then(result => res.status(200).json(result))
-    .catch(err => res.json(err))
-  // RETURN THE USER OBJECT
-  // this needs a middleware to verify user id
+router.get('/:id', validateUserId, (req, res) => {
+    res.status(200).json(req.user)
 });
 
 router.post('/', (req, res) => {
@@ -32,7 +27,7 @@ router.post('/', (req, res) => {
   // this needs a middleware to check that the request body is valid
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUserId, (req, res) => {
   const { id } = req.params;
   Users.update(id, req.body)
     .then(result => res.status(201).json(result))
@@ -42,19 +37,16 @@ router.put('/:id', (req, res) => {
   // and another middleware to check that the request body is valid
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   const { id } = req.params;
-  let post = ""
-  Users.getById(id)
-    .then(result => { return post = result })
   Users.remove(id)
-    .then(result => res.status(200).json(post))
+    .then(result => res.status(200).json(req.user))
     .catch(err => res.json(err))
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, (req, res) => {
   const { id } = req.params;
   Posts.get()
     .then(posts => {
@@ -66,7 +58,7 @@ router.get('/:id/posts', (req, res) => {
   // this needs a middleware to verify user id
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
   Posts.insert({ text: text, user_id: id })
